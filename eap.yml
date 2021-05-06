@@ -1,6 +1,6 @@
 ---
 - name: EAP
-  hosts: "{{ hostname }}"
+  hosts: eap
   gather_facts: true
   vars: 
     jboss_process: 
@@ -36,7 +36,6 @@
         jboss_version: "{{ java_process.stdout | regex_search('(?i)[j J]boss-eap-\\d+\\.\\d+|wildfly') }}"
       when: java_process.stdout.find('jboss') != -1
 
-
     - name: Create file header
       lineinfile: 
         dest: /tmp/eap
@@ -45,10 +44,16 @@
       delegate_to: localhost
       run_once: true
 
-    - name: Build Output
-      lineinfile:
-        dest: /tmp/eap
-        line: "{{ansible_hostname}}, {{fuse_installed}}, {{jboss_installed}}, {{jboss_version}} " 
+#    - name: Build Output
+#      lineinfile:
+#        dest: /tmp/eap
+#        line: "{{ansible_hostname}}, {{fuse_installed}}, {{jboss_installed}}, {{jboss_version}} " 
+#      delegate_to: localhost
+#    when: ansible_os_family == "Windows"
 
+    - name: Build the report
+      template:
+        src: csv.j2
+        dest: /tmp/eap_csv
       delegate_to: localhost
-    when: ansible_os_family == "Windows"
+      run_once: True
